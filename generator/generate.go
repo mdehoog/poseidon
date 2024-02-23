@@ -14,14 +14,30 @@ import (
 	"github.com/triplewz/poseidon"
 )
 
+type constantsStr struct {
+	C [][]string // compRoundConstants
+	S [][]string // sparseMatrix
+	M [][][]string // MDS matrix
+	P [][][]string // preSparseMatrix
+}
+
 func main() {
+	levels := 2 // to set to 15
+	startingLevel := 2
 	field := 1
 	sbox := 0
 	fieldSize := fr.Bits
 	alpha := poseidon.Alpha // TODO check value for different curves
 	securityLevel := poseidon.SecurityLevel
 
-	for width := 2; width <= 2; width++ {
+	cs := constantsStr{
+		C: make([][]string, levels),
+		S: make([][]string, levels),
+		M: make([][][]string, levels),
+		P: make([][][]string, levels),
+	}
+
+	for width := startingLevel; width < levels + startingLevel; width++ {
 		args := []string{
 			"./generator/generate_params_poseidon.sage",
 			strconv.Itoa(field),
@@ -37,22 +53,11 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		roundConstantsStart := bytes.Index(out, []byte("Round constants for GF(p):"))
-		roundConstantsEnd := roundConstantsStart + bytes.Index(out[roundConstantsStart:], []byte("]"))
-		roundConstantsString := string(out[roundConstantsStart+27 : roundConstantsEnd+1])
+
 		mdsMatrixStart := bytes.Index(out, []byte("MDS matrix:"))
 		mdsMatrixEnd := mdsMatrixStart + bytes.Index(out[mdsMatrixStart:], []byte("]]"))
 		mdsMatrixString := string(out[mdsMatrixStart+12 : mdsMatrixEnd+2])
 		hexStringRegexp := regexp.MustCompile(`'0x[0-9a-fA-F]+'`)
-
-		var roundConstants []*fr.Element
-		for _, match := range hexStringRegexp.FindAllString(roundConstantsString, -1) {
-			roundConstant, ok := new(big.Int).SetString(match[3:len(match)-1], 16)
-			if !ok {
-				panic(fmt.Sprintf("could not parse hex value: %s", match))
-			}
-			roundConstants = append(roundConstants, new(fr.Element).SetBigInt(roundConstant))
-		}
 
 		var mdsMatrix poseidon.Matrix[*fr.Element]
 		mdsMatrixStrings := hexStringRegexp.FindAllString(mdsMatrixString, -1)
@@ -74,8 +79,50 @@ func main() {
 			panic(err)
 		}
 
-		for _, rc := range constants.CompRoundConsts {
-			fmt.Printf("0x%s\n", rc.Text(16))
+		level := width - startingLevel
+
+		// C
+		cs.C[level] = make([]string, len(constants.CompRoundConsts))
+		for i, e := range constants.CompRoundConsts {
+			cs.C[level][i] = e.ToBigIntRegular(new(big.Int)).Text(16)
 		}
+
+		// S
+		for _, e := range constants.Sparse {
+			for _, w := range e.WHat {
+				cs.S[level] = append(cs.S[level], w.ToBigIntRegular(new(big.Int)).Text(16))
+			}
+
+			for _, v := range e.V {
+				cs.S[level] = append(cs.S[level], v.ToBigIntRegular(new(big.Int)).Text(16))
+			}
+		}
+
+		// M
+		cs.M[level] = make([][]string, len(mdsMatrix))
+		for i, e := range mdsMatrix {
+			cs.M[level][i] = make([]string, len(e))
+			for j, f := range e {
+				cs.M[level][i][j] = f.ToBigIntRegular(new(big.Int)).Text(16)
+			}
+		}
+
+		// P
+		cs.P[level] = make([][]string, len(constants.PreSparse))
+		for i, e := range constants.PreSparse {
+			cs.P[level][i] = make([]string, len(e))
+			for j, f := range e {
+				cs.P[level][i][j] = f.ToBigIntRegular(new(big.Int)).Text(16)
+			}
+		}
+
+
 	}
+
+	var b bytes.Buffer
+	err := GenerateTemplate(&b, &cs)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(b.String())
 }
