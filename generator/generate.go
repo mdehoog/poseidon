@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"go/format"
 	"math"
 	"math/big"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -14,30 +16,23 @@ import (
 	"github.com/triplewz/poseidon"
 )
 
-type constantsStr struct {
-	C [][]string // compRoundConstants
-	S [][]string // sparseMatrix
-	M [][][]string // MDS matrix
-	P [][][]string // preSparseMatrix
-}
-
 func main() {
-	levels := 2 // to set to 15
+	levels := 16
 	startingLevel := 2
 	field := 1
 	sbox := 0
 	fieldSize := fr.Bits
-	alpha := poseidon.Alpha // TODO check value for different curves
+	alpha := 5 // TODO check value for different curves
 	securityLevel := poseidon.SecurityLevel
 
-	cs := constantsStr{
+	cs := constants{
 		C: make([][]string, levels),
 		S: make([][]string, levels),
 		M: make([][][]string, levels),
 		P: make([][][]string, levels),
 	}
 
-	for width := startingLevel; width < levels + startingLevel; width++ {
+	for width := startingLevel; width < levels+startingLevel; width++ {
 		args := []string{
 			"./generator/generate_params_poseidon.sage",
 			strconv.Itoa(field),
@@ -50,6 +45,15 @@ func main() {
 		}
 		fmt.Printf("Executing 'sage %s'\n", strings.Join(args, " "))
 		out, err := exec.Command("sage", args...).Output()
+		if err != nil {
+			panic(err)
+		}
+
+		rf, err := strconv.Atoi(string(regexp.MustCompile(`R_F=(\d+)`).FindSubmatch(out)[1]))
+		if err != nil {
+			panic(err)
+		}
+		rp, err := strconv.Atoi(string(regexp.MustCompile(`R_P=(\d+)`).FindSubmatch(out)[1]))
 		if err != nil {
 			panic(err)
 		}
@@ -74,49 +78,42 @@ func main() {
 			}
 		}
 
-		constants, err := poseidon.GenPoseidonConstants[*fr.Element](width, field, sbox, true, mdsMatrix)
+		constants, err := poseidon.GenPoseidonConstants[*fr.Element](width, field, sbox, rf, rp, mdsMatrix)
 		if err != nil {
 			panic(err)
 		}
 
 		level := width - startingLevel
 
-		// C
 		cs.C[level] = make([]string, len(constants.CompRoundConsts))
 		for i, e := range constants.CompRoundConsts {
-			cs.C[level][i] = e.ToBigIntRegular(new(big.Int)).Text(16)
+			cs.C[level][i] = e.BigInt(new(big.Int)).Text(16)
 		}
 
-		// S
 		for _, e := range constants.Sparse {
 			for _, w := range e.WHat {
-				cs.S[level] = append(cs.S[level], w.ToBigIntRegular(new(big.Int)).Text(16))
+				cs.S[level] = append(cs.S[level], w.BigInt(new(big.Int)).Text(16))
 			}
-
 			for _, v := range e.V {
-				cs.S[level] = append(cs.S[level], v.ToBigIntRegular(new(big.Int)).Text(16))
+				cs.S[level] = append(cs.S[level], v.BigInt(new(big.Int)).Text(16))
 			}
 		}
 
-		// M
 		cs.M[level] = make([][]string, len(mdsMatrix))
 		for i, e := range mdsMatrix {
 			cs.M[level][i] = make([]string, len(e))
 			for j, f := range e {
-				cs.M[level][i][j] = f.ToBigIntRegular(new(big.Int)).Text(16)
+				cs.M[level][i][j] = f.BigInt(new(big.Int)).Text(16)
 			}
 		}
 
-		// P
 		cs.P[level] = make([][]string, len(constants.PreSparse))
 		for i, e := range constants.PreSparse {
 			cs.P[level][i] = make([]string, len(e))
 			for j, f := range e {
-				cs.P[level][i][j] = f.ToBigIntRegular(new(big.Int)).Text(16)
+				cs.P[level][i][j] = f.BigInt(new(big.Int)).Text(16)
 			}
 		}
-
-
 	}
 
 	var b bytes.Buffer
@@ -124,5 +121,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(b.String())
+	source, err := format.Source(b.Bytes())
+	if err != nil {
+		panic(err)
+	}
+	err = os.WriteFile("./constants.go", source, 0644)
+	if err != nil {
+		panic(err)
+	}
 }
