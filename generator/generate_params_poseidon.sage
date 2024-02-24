@@ -21,7 +21,7 @@ if len(sys.argv) < 8:
 # sage generate_params_poseidon.sage 1 0 252 16 3 128 0x800000000000011000000000000000000000000000000000000000000000001
 
 # Flags
-write_file = True
+write_file = False
 
 # Parameters
 FIELD = int(sys.argv[1]) # 0 .. GF(2^n), 1 .. GF(p)
