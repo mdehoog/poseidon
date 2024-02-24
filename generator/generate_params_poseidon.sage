@@ -106,6 +106,8 @@ def find_FD_round_numbers(p, t, alpha, M, cost_function, security_margin):
                         R_F = ceil(R_F_t)
                         min_cost = cost
                         max_cost_rf = R_F
+    # round up to multiple of t:
+    R_P = (R_P+t-1)//t*t
     return (int(R_F), int(R_P))
 
 def calc_final_numbers_fixed(p, t, alpha, M, security_margin):
