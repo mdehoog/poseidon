@@ -12,9 +12,18 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
+	"github.com/consensys/gnark-crypto/ecc/bw6-761/fr"
 	"github.com/triplewz/poseidon"
+
+	"github.com/mdehoog/poseidon/constants"
 )
+
+var alphas = map[string]int{
+	"bn254":     5,
+	"bls12-381": 5,
+	"bls12-377": 9,
+	"bw6-761":   5,
+}
 
 func main() {
 	levels := 16
@@ -25,7 +34,8 @@ func main() {
 	alpha := 5 // TODO check value for different curves
 	securityLevel := poseidon.SecurityLevel
 
-	cs := constants{
+	cs := constants.Strings{
+		F: fr.Modulus().Text(16),
 		C: make([][]string, levels),
 		S: make([][]string, levels),
 		M: make([][][]string, levels),
@@ -125,7 +135,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = os.WriteFile("./constants.go", source, 0644)
+	err = os.WriteFile("./constants/bw6-761.go", source, 0644)
 	if err != nil {
 		panic(err)
 	}
