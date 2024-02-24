@@ -78,7 +78,7 @@ func main() {
 			}
 		}
 
-		constants, err := poseidon.GenPoseidonConstants[*fr.Element](width, field, sbox, rf, rp, mdsMatrix)
+		constants, err := poseidon.GenCustomPoseidonConstants[*fr.Element](width, field, sbox, rf, rp, mdsMatrix)
 		if err != nil {
 			panic(err)
 		}

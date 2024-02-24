@@ -6,8 +6,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/leanovate/gopter v0.2.9 h1:fQjYxZaynp97ozCzfOyOuAGOU4aU/z37zf/tOujFk7c=
 github.com/leanovate/gopter v0.2.9/go.mod h1:U2L/78B+KVFIx2VmW6onHJQzXtFb+p5y3y2Sh+Jxxv8=
-github.com/mdehoog/triplewz-poseidon v0.0.0-20240224053345-226acd410962 h1:ZRW1JEOSTnjEOTjTALW0gb58F+3muLThAcIMeaFDBls=
-github.com/mdehoog/triplewz-poseidon v0.0.0-20240224053345-226acd410962/go.mod h1:fmoxtMcbtMUjlSJmpuS3Wk/oKSvdJpIp9YWRbsOu3T0=
+github.com/mdehoog/triplewz-poseidon v0.0.0-20240224062259-6ac0a3e35064 h1:kkk0OPVh3eEP1OqKXweYYIVRhtXg2MOHawlZSFbYyaM=
+github.com/mdehoog/triplewz-poseidon v0.0.0-20240224062259-6ac0a3e35064/go.mod h1:fmoxtMcbtMUjlSJmpuS3Wk/oKSvdJpIp9YWRbsOu3T0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
