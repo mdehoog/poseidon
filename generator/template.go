@@ -1,4 +1,4 @@
-package main
+package generator
 
 import (
 	"io"
@@ -6,6 +6,14 @@ import (
 
 	"github.com/mdehoog/poseidon/constants"
 )
+
+func generateTemplate(w io.Writer, constants *constants.Strings) error {
+	t, err := template.New("t").Parse(tmpl)
+	if err != nil {
+		return err
+	}
+	return t.Execute(w, constants)
+}
 
 const (
 	tmpl = `
@@ -42,11 +50,3 @@ const (
 	}
     `
 )
-
-func GenerateTemplate(w io.Writer, constants *constants.Strings) error {
-	t, err := template.New("t").Parse(tmpl)
-	if err != nil {
-		return err
-	}
-	return t.Execute(w, constants)
-}

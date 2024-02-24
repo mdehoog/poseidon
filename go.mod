@@ -31,4 +31,4 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
-replace github.com/triplewz/poseidon => github.com/mdehoog/triplewz-poseidon v0.0.0-20240224062259-6ac0a3e35064
+replace github.com/triplewz/poseidon => github.com/mdehoog/triplewz-poseidon v0.0.0-20240224225921-7387bd5468ec
