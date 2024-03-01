@@ -5,7 +5,7 @@ go 1.21.1
 require (
 	github.com/consensys/gnark v0.9.2-0.20240209165259-7fc72aeffd54
 	github.com/consensys/gnark-crypto v0.12.2-0.20231221171913-5d5eded6bb15
-	github.com/triplewz/poseidon v0.0.0-20230828015038-79d8165c88ed
+	github.com/triplewz/poseidon v0.0.2-0.20240301012700-7d33728ad2dd
 )
 
 require (
@@ -30,5 +30,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
-
-replace github.com/triplewz/poseidon => github.com/mdehoog/triplewz-poseidon v0.0.0-20240224225921-7387bd5468ec
